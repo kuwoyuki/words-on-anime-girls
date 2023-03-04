@@ -86,10 +86,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // spam channel
             send_anime_girl(hook_url.as_str(), &listing.url)
                 .await
-                .expect("failed sending discord webhook");
+                .unwrap();
             // bump lst
             db.last_listing = listing.name;
-            db.write();
+
+            task::spawn_blocking(move || {
+                db.write();
+            })
+            .await
+            .unwrap();
         }
     });
 
