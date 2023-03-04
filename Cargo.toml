@@ -1,0 +1,21 @@
+[package]
+name = "words_on_anime_girls"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11.14", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.93"
+tokio = { version = "1.25.0", features = ["full"] }
+
+# openssl is a indirect dependency because of reqwest, I have to add openssl as
+# a direct dependency if I want to enable the "vendored" feature, but for
+# Windows it breaks the build. Looks like adding it as an optional dependency is
+# working for both cases
+# openssl = { version = "0.10.45", features = ["vendored"] }
