@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: words-on-anime-girls-config
+  namespace: default
+data:
+  CLIENT_ID: ""
+  CLIENT_SECRET: ""
+  DISCORD_HOOK: ""
+  INTERVAL: "300"

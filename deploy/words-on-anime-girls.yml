@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: words-on-anime-girls
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: words-on-anime-girls
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: words-on-anime-girls
+    spec:
+      containers:
+        - name: words-on-anime-girls
+          image: registry.lactose.app/kuwoyuki/words-on-anime-girls
+          envFrom:
+            - configMapRef:
+                name: words-on-anime-girls-config
+          volumeMounts:
+            - name: volv
+              mountPath: /var/lib/words-on-anime-girls
+      volumes:
+        - name: volv
+          persistentVolumeClaim:
+            claimName: words-on-anime-girls-pvc
