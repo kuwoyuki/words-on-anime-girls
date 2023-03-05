@@ -144,9 +144,13 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
                             url: db.oldest_url,
                         }
                     } else {
-                        listing = get_newer(&reddit_client, srv.last_listing.as_str())
-                            .await
-                            .unwrap()
+                        listing = match get_newer(&reddit_client, srv.last_listing.as_str()).await {
+                            Ok(l) => l,
+                            Err(e) => {
+                                println!("get_newer: {}", e);
+                                continue;
+                            }
+                        }
                     }
                     // spam channel
                     send_anime_girl(&srv.webhook_url, &listing.url)
@@ -167,83 +171,6 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     for h in handles {
         h.await.unwrap();
     }
-
-    // for srv in bar {
-    //     // let srv = Arc::clone();
-    //     let handle = task::spawn(async move {
-    //         let mut interval = time::interval(Duration::from_secs(srv.interval));
-    //         loop {
-    //             interval.tick().await;
-    //             println!("{:?}", srv);
-
-    //             // let c_lock = Arc::clone(&db_lock);
-
-    //             // let db = c_lock.read().unwrap();
-
-    //             // let listing: RedditListingChildData;
-    //             // if srv.last_listing == "" {
-    //             //     listing = RedditListingChildData {
-    //             //         name: db.oldest_listing,
-    //             //         title: "".to_string(),
-    //             //         url: db.oldest_url,
-    //             //     }
-    //             // } else {
-    //             //     listing = match get_newer(&reddit_client, srv.last_listing.as_str()).await {
-    //             //         Ok(l) => l,
-    //             //         Err(e) => {
-    //             //             println!("get_newer: {}", e);
-    //             //             continue;
-    //             //         }
-    //             //     }
-    //             // }
-    //             // spam channel
-    //             // send_anime_girl(&srv.webhook_url, &listing.url)
-    //             //     .await
-    //             //     .unwrap();
-    //             // bump lst
-    //             // srv.last_listing = listing.name;
-    //             // tx.send(listing).await.unwrap();
-    //         }
-    //     });
-    //     handles.push(handle);
-    // }
-
-    // for srv in db.servers.clone() {
-    //     let handle = task::spawn(async move {
-    //         // db = WordsOnAnimeGirls::read();
-
-    //             let mut db = WordsOnAnimeGirls::read();
-    //             let listing: RedditListingChildData;
-    //             if srv.last_listing == "" {
-    //                 listing = RedditListingChildData {
-    //                     name: db.oldest_listing,
-    //                     title: "".to_string(),
-    //                     url: db.oldest_url,
-    //                 }
-    //             } else {
-    //                 listing = match get_newer(&reddit_client, srv.last_listing.as_str()).await {
-    //                     Ok(l) => l,
-    //                     Err(e) => {
-    //                         println!("get_newer: {}", e);
-    //                         continue;
-    //                     }
-    //                 }
-    //             }
-    //             // spam channel
-    //             send_anime_girl(&srv.webhook_url, &listing.url)
-    //                 .await
-    //                 .unwrap();
-    //             // bump lst
-    //             srv.last_listing = listing.name;
-    //             tx.send(db).await.unwrap();
-    //         }
-    //     });
-    //     handles.push(handle);
-    // }
-
-    // for handle in handles {
-    //     handle.await.unwrap();
-    // }
 
     Ok(())
 }
