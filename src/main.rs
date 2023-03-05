@@ -54,6 +54,17 @@ async fn send_anime_girl(hook_url: &str, img_url: &str) -> reqwest::Result<Respo
     hook.fire().await
 }
 
+#[derive(Debug)]
+struct Msg {
+    webhook_url: String,
+    name: String,
+}
+#[derive(Debug)]
+enum MsgTypes {
+    Old(String, String),
+    New(Msg),
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
     WordsOnAnimeGirls::ensure_exists();
@@ -69,13 +80,29 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         let listing = find_oldest_listing(&reddit_client)
             .await
             .expect("failed to find the oldest listing, can't continue.");
-        tx.send(db.update_old_listing(listing.name, listing.url))
+        tx.send(MsgTypes::Old(listing.name, listing.url))
             .await
             .unwrap();
     }
 
     task::spawn_blocking(move || {
-        while let Some(db) = rx.blocking_recv() {
+        while let Some(lst) = rx.blocking_recv() {
+            let mut db = WordsOnAnimeGirls::read();
+            match lst {
+                MsgTypes::Old(name, url) => {
+                    db.oldest_listing = name;
+                    db.oldest_url = url;
+                }
+                MsgTypes::New(Msg { webhook_url, name }) => {
+                    for srv in db.servers.iter_mut() {
+                        if srv.webhook_url != webhook_url {
+                            continue;
+                        }
+                        srv.last_listing = name.to_owned();
+                    }
+                }
+            }
+
             db.write();
             println!("db written: {:?}", db);
         }
@@ -122,9 +149,15 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
                         .await
                         .unwrap();
 
-                    let db =
-                        db.update_last_listing(srv.webhook_url.to_owned(), listing.name.to_owned());
-                    tx.send(db).await.unwrap();
+                    tx.send(MsgTypes::New(Msg {
+                        webhook_url: srv.webhook_url.to_owned(),
+                        name: listing.name,
+                    }))
+                    .await
+                    .unwrap();
+                    // let db =
+                    //     db.update_last_listing(srv.webhook_url.to_owned(), listing.name.to_owned());
+                    // tx.send(db).await.unwrap();
                 }
             })
         })

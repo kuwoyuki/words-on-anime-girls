@@ -32,30 +32,29 @@ impl WordsOnAnimeGirls {
         serde_json::from_str::<WordsOnAnimeGirls>(&data).unwrap()
     }
 
-    pub fn write(&self) -> WordsOnAnimeGirls {
+    pub fn write(&self) -> () {
         let file = fs::File::create(&PATH).unwrap();
         let mut writer = BufWriter::new(file);
         serde_json::to_writer(&mut writer, self).unwrap();
         writer.flush().unwrap();
-        self.clone()
     }
 
-    pub fn update_last_listing(&self, webhook_url: String, name: String) -> Self {
-        let mut db = self.clone();
-        for srv in db.servers.iter_mut() {
-            if srv.webhook_url != webhook_url {
-                continue;
-            }
-            srv.last_listing = name;
-            break;
-        }
-        db
-    }
+    // pub fn update_last_listing(&self, webhook_url: String, name: String) -> Self {
+    //     let mut db = self.clone();
+    //     for srv in db.servers.iter_mut() {
+    //         if srv.webhook_url != webhook_url {
+    //             continue;
+    //         }
+    //         srv.last_listing = name;
+    //         break;
+    //     }
+    //     db
+    // }
 
-    pub fn update_old_listing(&self, name: String, url: String) -> Self {
-        let mut db = self.clone();
-        db.oldest_listing = name;
-        db.oldest_url = url;
-        db
-    }
+    // pub fn update_old_listing(&self, name: String, url: String) -> Self {
+    //     let mut db = self.clone();
+    //     db.oldest_listing = name;
+    //     db.oldest_url = url;
+    //     db
+    // }
 }
