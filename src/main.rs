@@ -122,7 +122,6 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
             let tx = tx.clone();
             tokio::spawn(async move {
                 let mut interval = time::interval(Duration::from_secs(srv.interval));
-
                 loop {
                     interval.tick().await;
 
@@ -135,23 +134,21 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
                         .find(|&x| x.webhook_url == srv.webhook_url)
                         .unwrap();
 
-                    let listing;
-
-                    if srv.last_listing == "" {
-                        listing = RedditListingChildData {
+                    let listing = if srv.last_listing == "" {
+                        RedditListingChildData {
                             name: db.oldest_listing,
                             title: "".to_string(),
                             url: db.oldest_url,
                         }
                     } else {
-                        listing = match get_newer(&reddit_client, srv.last_listing.as_str()).await {
+                        match get_newer(&reddit_client, srv.last_listing.as_str()).await {
                             Ok(l) => l,
                             Err(e) => {
                                 println!("get_newer: {}", e);
                                 continue;
                             }
                         }
-                    }
+                    };
                     // spam channel
                     send_anime_girl(&srv.webhook_url, &listing.url)
                         .await
