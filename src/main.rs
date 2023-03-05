@@ -90,11 +90,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
             // bump lst
             db.last_listing = listing.name;
 
-            task::spawn_blocking(move || {
-                db.write();
-            })
-            .await
-            .unwrap();
+            task::spawn_blocking(move || db.write()).await.unwrap();
         }
     });
 
