@@ -38,6 +38,7 @@ pub struct RedditListings {
     pub data: RedditListingData,
 }
 
+#[derive(Clone)]
 pub struct RedditClient {
     client: Client,
     // todo

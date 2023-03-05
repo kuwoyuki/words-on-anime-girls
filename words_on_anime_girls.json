@@ -1,1 +1,16 @@
-{"last_listing":"t3_rqitcp","oldest_listing":"t3_rogrt2"}
+{
+  "servers": [
+    {
+      "webhook_url": "",
+      "last_listing": "t3_rqu9wy",
+      "interval": 5
+    },
+    {
+      "webhook_url": "",
+      "last_listing": "",
+      "interval": 5
+    }
+  ],
+  "oldest_listing": "t3_rogrt2",
+  "oldest_url": "https://i.redd.it/sf91yqbyzq781.jpg"
+}

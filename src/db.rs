@@ -5,11 +5,18 @@ use std::io::{BufWriter, Write};
 
 const PATH: &str = "/var/lib/words_on_anime_girls/db.json";
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 // TODO: server_id key?
-pub struct WordsOnAnimeGirls {
+pub struct ServerData {
+    pub webhook_url: String,
     pub last_listing: String,
+    pub interval: u64,
+}
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct WordsOnAnimeGirls {
+    pub servers: Vec<ServerData>,
     pub oldest_listing: String,
+    pub oldest_url: String,
 }
 
 impl WordsOnAnimeGirls {
