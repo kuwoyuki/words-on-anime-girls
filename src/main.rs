@@ -3,16 +3,16 @@ mod reddit;
 mod webhook;
 
 use db::WordsOnAnimeGirls;
-use reddit::{RedditClient, RedditListingChildData};
+use reddit::{ListingError, RedditClient, RedditListingChildData};
 use reqwest::Response;
 use std::env;
-use std::error::Error;
+use std::error;
 use std::time::Duration;
 use tokio::{task, time};
 
 async fn find_oldest_listing(
     reddit_client: &RedditClient,
-) -> Result<RedditListingChildData, Box<dyn Error>> {
+) -> Result<RedditListingChildData, ListingError> {
     let mut after: Option<String> = None;
     let mut oldest_listing: Option<RedditListingChildData> = None;
 
@@ -29,7 +29,7 @@ async fn find_oldest_listing(
         after = Some(oldest_listing.as_ref().unwrap().name.to_owned());
     }
     return match oldest_listing {
-        None => Err("Couldn't find oldest listing".into()),
+        None => Err(ListingError::NoListing),
         Some(x) => Ok(x),
     };
 }
@@ -37,10 +37,10 @@ async fn find_oldest_listing(
 async fn get_newer(
     reddit_client: &RedditClient,
     before: &str,
-) -> Result<RedditListingChildData, Box<dyn Error>> {
+) -> Result<RedditListingChildData, ListingError> {
     let newer_listing = reddit_client.get_listings("1", None, Some(before)).await?;
     return match newer_listing.first() {
-        None => Err("No newer listing exists".into()),
+        None => Err(ListingError::NoListing),
         Some(x) => Ok(x.data.clone()),
     };
 }
@@ -52,7 +52,7 @@ async fn send_anime_girl(hook_url: &str, img_url: &str) -> reqwest::Result<Respo
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<(), Box<dyn error::Error>> {
     WordsOnAnimeGirls::ensure_exists();
     // todo: config or sth
     let client_id = env::var("CLIENT_ID").expect("$CLIENT_ID is not set");

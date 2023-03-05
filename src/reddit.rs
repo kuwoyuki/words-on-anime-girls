@@ -4,6 +4,7 @@ use reqwest::{
 };
 use serde::Deserialize;
 use std::error;
+use std::fmt;
 
 #[derive(Deserialize, Debug)]
 struct RedditAuthResponse {
@@ -42,6 +43,36 @@ pub struct RedditClient {
     // todo
 }
 
+#[derive(Debug)]
+pub enum ListingError {
+    NoListing,
+    Request(reqwest::Error),
+}
+
+impl error::Error for ListingError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        match *self {
+            ListingError::NoListing => None,
+            ListingError::Request(ref e) => Some(e),
+        }
+    }
+}
+
+impl fmt::Display for ListingError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            ListingError::NoListing => write!(f, "no listing was found"),
+            ListingError::Request(..) => write!(f, "the reddit request failed"),
+        }
+    }
+}
+
+impl From<reqwest::Error> for ListingError {
+    fn from(err: reqwest::Error) -> ListingError {
+        ListingError::Request(err)
+    }
+}
+
 impl RedditClient {
     pub async fn new(client_id: &str, client_secret: &str) -> Result<RedditClient, Error> {
         let mut headers = HeaderMap::new();
@@ -72,7 +103,7 @@ impl RedditClient {
         count: &str,
         after: Option<&str>,
         before: Option<&str>,
-    ) -> Result<Vec<RedditListingChild>, Box<dyn error::Error>> {
+    ) -> Result<Vec<RedditListingChild>, Error> {
         let mut qs: Vec<(&str, &str)> = vec![("limit", count)];
         match after {
             Some(x) => qs.push(("after", x)),
