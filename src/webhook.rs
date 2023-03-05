@@ -56,9 +56,9 @@ impl DiscordWebHook {
             .await
     }
 
-    // pub fn set_avatar_url(&mut self, avatar_url: &str) {
-    //     self.payload.avatar_url = Some(avatar_url.to_owned());
-    // }
+    pub fn set_avatar_url(&mut self, avatar_url: &str) {
+        self.payload.avatar_url = Some(avatar_url.to_owned());
+    }
 
     pub fn set_username(&mut self, username: &str) {
         let mut tmp_username = username.to_owned();

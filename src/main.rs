@@ -48,6 +48,7 @@ async fn get_newer(
 async fn send_anime_girl(hook_url: &str, img_url: &str) -> reqwest::Result<Response> {
     let mut hook = webhook::DiscordWebHook::new(hook_url, img_url);
     hook.set_username("Anime Girls");
+    hook.set_avatar_url("https://awau.moe/qj372zX.jpg");
     hook.fire().await
 }
 
