@@ -138,10 +138,11 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
                     } else {
                         match get_newer(&reddit_client, srv.last_listing.as_str()).await {
                             Ok(l) => l,
-                            Err(e) => {
-                                println!("get_newer: {}", e);
+                            Err(ListingError::NoListing) => {
+                                println!("get_newer: no new listing available");
                                 continue;
                             }
+                            Err(ListingError::Request(e)) => panic!("{:?}", e),
                         }
                     };
                     // spam channel
